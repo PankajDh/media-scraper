@@ -11,7 +11,7 @@ function addRoutes(app) {
     });
 
     app.get('/scrape', async (req, res) => {
-        const result = await sourceUrlService.get();
+        const result = await sourceUrlService.get(req.query);
         res.json(result);
     });
 

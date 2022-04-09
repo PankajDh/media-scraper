@@ -21,7 +21,7 @@ async function runQuery(queryString, queryParams, client) {
 
     queryParams = queryParams?.length ? queryParams : [];
    
-    console.log(`query struing -> ${queryString}`);
+    console.log(`query string -> ${queryString}`);
     console.log(`query parms -> ${queryParams}`);
     const result = await mainClient.query(queryString, queryParams);
     
@@ -57,49 +57,8 @@ function createInsertStatement(tableName, columns, values) {
     )}) values ${finalDollarizedParams.join(',')}`;
 }
 
-function createSelectStatement(
-    tableName,
-    columns,
-    filters,
-    limit,
-    offset,
-    orderBy
-) {
-    let columnsToFind = columns?.length ? columns.join(',') : '*';
-
-    const whereConditions = [];
-    const queryParams = [];
-
-    for (const [key, value] of Object.entries(filters || {})) {
-        if (Array.isArray(value)) {
-            whereConditions.push(
-                `${key} IN (${value.map((_, idx) => `$${idx + 1}`).join(',')})`
-            );
-            queryParams.push(...value);
-        } else {
-            whereConditions.push(`${key}=$${queryParams + 1}`);
-            queryParams.push(value);
-        }
-    }
-    const finalWhereStm = filters && Object.keys(filters).length ? `WHERE ${whereConditions.join('AND')}` : '';
-
-    const limitStm = limit ? `LIMIT ${limit}` : '';
-    const offsetStm = offset ? `OFFSET ${offset}` : '';
-
-    let orderByStm = '';
-    if (orderBy) {
-        orderByStm = `ORDER BY ${orderBy.key} ${orderBy.direction}`;
-    }
-
-    return {
-        queryString: `SELECT ${columnsToFind} FROM ${tableName} ${finalWhereStm} ${orderByStm} ${limitStm} ${offsetStm};`,
-        queryParams,
-    };
-}
-
 module.exports = {
     runQuery,
     getConnection,
     createInsertStatement,
-    createSelectStatement,
 };

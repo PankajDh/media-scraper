@@ -19,9 +19,10 @@ async function get(params) {
     }
 
     if(searchString) {
-        filters.push(`(${TABLE_NAMES.SOURCE_URLS}.url ilike '%${utils.escapeSQLWildcards(searchString)}%' OR 
-            ${TABLE_NAMES.SCRAPED_URLS}.url ilike '%${utils.escapeSQLWildcards(searchString)}%'
+        filters.push(`(${TABLE_NAMES.SOURCE_URLS}.url ilike $${queryParams.length + 1} OR 
+            ${TABLE_NAMES.SCRAPED_URLS}.url ilike $${queryParams.length + 1}
         )`);
+        queryParams.push(`%${utils.escapeSQLWildcards(searchString)}%`);
     }
 
     const selectStatement = `

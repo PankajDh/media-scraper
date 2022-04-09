@@ -29,16 +29,25 @@ async function add(msgBody) {
     return dbService.runQuery(insertStatement, sanitizedUrls);
 }
 
-async function get(filters, limit, offset, orderBy) {
-    const { queryString, queryParams } = dbService.createSelectStatement(
-        TABLE_NAMES.SOURCE_URLS,
-        [],
-        filters,
-        limit,
-        offset,
-        orderBy
-    );
-    return dbService.runQuery(queryString, queryParams);
+async function get(params) {
+    const { resultsPerPage = 20, pageNumber = 1, searchString } = params;
+
+    const filters = [];
+    const queryParams = [];
+    if (searchString) {
+        filters.push(`(${TABLE_NAMES.SOURCE_URLS}.url ilike $${queryParams.length + 1})`);
+        queryParams.push(`%${utils.escapeSQLWildcards(searchString)}%`);
+    }
+
+    const selectStatement = `
+        SELECT 
+            ${TABLE_NAMES.SOURCE_URLS}.*
+        FROM ${TABLE_NAMES.SOURCE_URLS}
+        ${filters.length ? `WHERE ${filters.join(' AND ')}` : ''} 
+        LIMIT ${resultsPerPage}
+        OFFSET ${(pageNumber - 1) * resultsPerPage}
+    `;
+    return dbService.runQuery(selectStatement, queryParams);
 }
 
 async function _findUnscrapedUrls(dbClient) {
