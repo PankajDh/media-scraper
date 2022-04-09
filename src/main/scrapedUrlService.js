@@ -7,7 +7,7 @@ async function get(params) {
     const { resultsPerPage = 20, pageNumber = 1 } = params;
 
     // find the filter params
-    const { type } = params;
+    const { type, searchString } = params;
 
     const filters = [];
     const queryParams = [];
@@ -16,6 +16,12 @@ async function get(params) {
             `${TABLE_NAMES.SCRAPED_URLS}.type = $${queryParams.length + 1}`
         );
         queryParams.push(utils.escapeSQLWildcards(type));
+    }
+
+    if(searchString) {
+        filters.push(`(${TABLE_NAMES.SOURCE_URLS}.url ilike '%${utils.escapeSQLWildcards(searchString)}%' OR 
+            ${TABLE_NAMES.SCRAPED_URLS}.url ilike '%${utils.escapeSQLWildcards(searchString)}%'
+        )`);
     }
 
     const selectStatement = `
