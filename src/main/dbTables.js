@@ -18,6 +18,7 @@ const SCRAPED_URLS_TABLE = Object.freeze({
     URL: 'url',
     TYPE: 'type',
     SOURCE_URL_ID: 'source_url_id',
+    ALT: 'alt',
     CREATED_AT: 'created_at',
     UPDATED_AT: 'updated_at',
 });

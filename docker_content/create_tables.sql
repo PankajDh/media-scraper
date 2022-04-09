@@ -10,9 +10,10 @@ CREATE TABLE source_urls(
 
 CREATE TYPE scraped_url_type as ENUM('video','image');
 
-CREATE TABLE scraped_urls(ß
+CREATE TABLE scraped_urls(
     id bigserial PRIMARY KEY,
     url text NOT NULL,
+    alt text,
     type scraped_url_type NOT NULL,
     source_url_id BIGINT not null,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),

@@ -5,15 +5,15 @@ async function _scraper(browser, scrapingUrl) {
     await page.goto(scrapingUrl);
 
     const scrapingResult = await page.evaluate(() => {
-        const imageUrls = Array.from(document.querySelectorAll('img'), ({ src }) => src);
-        const videoUrls = Array.from(
+        const images = Array.from(document.querySelectorAll('img'), ({ src,alt }) => {return {src,alt} });
+        const videos = Array.from(
             document.querySelectorAll('video'),
-            ({ src }) => src
+            ({ src,alt }) => {return {src,alt} }
         );
 
         return {
-            imageUrls: imageUrls.filter((e) => !e.includes('gif')),
-            videoUrls,
+            images: images.filter(({src}) => !src.includes('gif')),
+            videos,
         };
     });
 
