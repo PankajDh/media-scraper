@@ -2,7 +2,7 @@ const utils = require('./utils');
 const dbService = require('./dbService');
 const scrapingService = require('./scrapingService');
 const scrapedUrlService = require('./scrapedUrlService');
-const { TABLE_NAMES } = require('./dbTables');
+const { TABLE_NAMES, SCRAPED_URLS_TABLE, SOURCE_URLS_TABLE} = require('./dbTables');
 
 /**
  * @summary adds the web urls for which we need to do the scrapping
@@ -22,7 +22,7 @@ async function add(msgBody) {
     const sanitizedUrls = uniqueUrls.map(utils.escapeSQLWildcards);
     const insertStatement = dbService.createInsertStatement(
         TABLE_NAMES.SOURCE_URLS,
-        ['url'],
+        [SOURCE_URLS_TABLE.URL],
         sanitizedUrls.map((e) => [e])
     );
 
@@ -35,7 +35,7 @@ async function get(params) {
     const filters = [];
     const queryParams = [];
     if (searchString) {
-        filters.push(`(${TABLE_NAMES.SOURCE_URLS}.url ilike $${queryParams.length + 1})`);
+        filters.push(`(${TABLE_NAMES.SOURCE_URLS}.${SOURCE_URLS_TABLE.URL} ilike $${queryParams.length + 1})`);
         queryParams.push(`%${utils.escapeSQLWildcards(searchString)}%`);
     }
 
@@ -53,7 +53,7 @@ async function get(params) {
 async function _findUnscrapedUrls(dbClient) {
     const selectStm = `
             Select * FROM ${TABLE_NAMES.SOURCE_URLS}
-            WHERE is_scraped = $1 and retries < $2 FOR UPDATE LIMIT $3
+            WHERE ${SOURCE_URLS_TABLE.IS_SCRAPED} = $1 and ${SOURCE_URLS_TABLE.RETRIES} < $2 FOR UPDATE LIMIT $3
         `;
 
     return dbService.runQuery(selectStm, [false, 3, 5], dbClient);
@@ -62,7 +62,7 @@ async function _findUnscrapedUrls(dbClient) {
 async function _updatedSuccessFulScraping(scrapingResult, dbClient) {
     const successResults = scrapingResult.filter(({status}) => status === 'success');
     const updateSuccessStm = `
-            UPDATE ${TABLE_NAMES.SOURCE_URLS} SET is_scraped = true where id in (${successResults.map((_, idx) => `$${idx + 1}`)})
+            UPDATE ${TABLE_NAMES.SOURCE_URLS} SET ${SOURCE_URLS_TABLE.IS_SCRAPED} = true where ${SOURCE_URLS_TABLE.ID} in (${successResults.map((_, idx) => `$${idx + 1}`)})
         `;
     await dbService.runQuery(updateSuccessStm, successResults.map(({id})=> id), dbClient);
 
@@ -87,7 +87,7 @@ async function _updatedFailedScraping(scrapingResult, dbClient) {
     }
 
     const updateFailedStm = `
-        UPDATE ${TABLE_NAMES.SOURCE_URLS} SET is_scraped = false, retries=retries + 1 where id in (${failedResults.map((_, idx) => `$${idx + 1}`)})
+        UPDATE ${TABLE_NAMES.SOURCE_URLS} SET ${SOURCE_URLS_TABLE.IS_SCRAPED} = false, ${SOURCE_URLS_TABLE.RETRIES}=${SOURCE_URLS_TABLE.RETRIES} + 1 where ${SOURCE_URLS_TABLE.ID} in (${failedResults.map((_, idx) => `$${idx + 1}`)})
     `;
     await dbService.runQuery(updateFailedStm, failedResults.map(({id})=> id), dbClient);
 }
