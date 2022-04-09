@@ -25,7 +25,7 @@ async function get(params) {
         FROM ${TABLE_NAMES.SCRAPED_URLS}
         INNER JOIN ${TABLE_NAMES.SOURCE_URLS} ON
             ${TABLE_NAMES.SCRAPED_URLS}.source_url_id = ${TABLE_NAMES.SOURCE_URLS}.id
-        ${filters.length ? `${filters.join(' AND ')}` : ''} 
+        ${filters.length ? `WHERE ${filters.join(' AND ')}` : ''} 
         LIMIT ${resultsPerPage}
         OFFSET ${(pageNumber - 1) * resultsPerPage}
     `;
