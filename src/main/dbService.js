@@ -17,21 +17,20 @@ async function getConnection() {
  * @returns any[]
  */
 async function runQuery(queryString, queryParams, client) {
-    const mainClient = client ? client: await getConnection();
+    const mainClient = client ? client : await getConnection();
 
     queryParams = queryParams?.length ? queryParams : [];
-   
+
     console.log(`query string -> ${queryString}`);
     console.log(`query parms -> ${queryParams}`);
     const result = await mainClient.query(queryString, queryParams);
-    
+
     if (!client) {
         await mainClient.release();
     }
 
     return result.rows;
 }
-
 
 /**
  * @summary prepare the insert statement for the weburls

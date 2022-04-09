@@ -5,17 +5,14 @@ async function _scraper(browser, scrapingUrl) {
     await page.goto(scrapingUrl);
 
     const scrapingResult = await page.evaluate(() => {
-        const imageUrls = Array.from(
-            document.querySelectorAll('img'),
-            ({ src }) => src
-        );
+        const imageUrls = Array.from(document.querySelectorAll('img'), ({ src }) => src);
         const videoUrls = Array.from(
             document.querySelectorAll('video'),
             ({ src }) => src
         );
 
         return {
-            imageUrls: imageUrls.filter(e => !e.includes('gif')),
+            imageUrls: imageUrls.filter((e) => !e.includes('gif')),
             videoUrls,
         };
     });
@@ -35,16 +32,15 @@ async function scrape(sourceUrlObjects) {
                     id,
                     url,
                     status: 'success',
-                    result : scrapingResult
-                 
+                    result: scrapingResult,
                 };
-            } catch(err) {
+            } catch (err) {
                 return {
                     id,
                     url,
                     status: 'failed',
-                    error: err
-                }
+                    error: err,
+                };
             }
         },
         { concurrency: 5 }
