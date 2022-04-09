@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "mediaScraper",
+            "runtimeExecutable": "/Users/pankajdhariwal/.nvm/versions/node/v14.16.0/bin/node",
+            "env": {
+                "PGUSER": "test",
+                "PGPASSWORD": "test",
+                "PGDATABASE": "test",
+                "PGPORT": "2221"
+            },
+            "program": "${workspaceFolder}/index.js"
+        }
+    ]
+}

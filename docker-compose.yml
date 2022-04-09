@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+    postgres:
+        image: postgres:12-alpine
+        ports:
+            - 2221:5432
+        environment:
+            POSTGRES_USER: test
+            POSTGRES_PASSWORD: test
+            POSTGRES_DATABASE: test
+        volumes:
+            - ./docker_content/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
