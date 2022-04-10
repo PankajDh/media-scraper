@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-
+const utils = require('./utils');
 const pool = new Pool();
 
 /**
@@ -37,7 +37,7 @@ async function runQuery(queryString, queryParams, client) {
  */
 function createInsertStatement(tableName, columns, values) {
     if (columns.length !== values[0].length) {
-        return 'chi chi';
+        throw utils.errorBuilder('columns and values do not match', 500);
     }
 
     let counter = 0;

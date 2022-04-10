@@ -163,6 +163,7 @@ async function scrapeSourceUrl() {
         await _updatedFailedScraping(scrapingResult, dbClient);
 
         await dbService.runQuery('COMMIT', [], dbClient);
+        await dbClient.release();
         return true;
     } catch (err) {
         if (dbClient) {
