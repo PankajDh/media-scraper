@@ -20,9 +20,7 @@ async function runQuery(queryString, queryParams, client) {
     const mainClient = client ? client : await getConnection();
 
     queryParams = queryParams?.length ? queryParams : [];
-
-    console.log(`query string -> ${queryString}`);
-    console.log(`query parms -> ${queryParams}`);
+    
     const result = await mainClient.query(queryString, queryParams);
 
     if (!client) {

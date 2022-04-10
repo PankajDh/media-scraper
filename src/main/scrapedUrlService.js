@@ -11,7 +11,12 @@ async function get(params) {
 
     const filters = [];
     const queryParams = [];
-    if (type) {
+    
+    if (type && !['video', 'image', 'all'].includes(type)) {
+        throw utils.errorBuilder('Invalid value for asset type', 400);
+    }
+
+    if (type && type != 'all') {
         filters.push(
             `${TABLE_NAMES.SCRAPED_URLS}.${SCRAPED_URLS_TABLE.TYPE} = $${
                 queryParams.length + 1

@@ -15,15 +15,16 @@ async function add(msgBody) {
     
     const urlsAlreadyPresent = (await _getByUrls(webUrls)).map(({ url }) => url);
     const uniqueUrls = webUrls.filter((val) => !urlsAlreadyPresent.includes(val));
-
-    const sanitizedUrls = uniqueUrls.map(utils.escapeSQLWildcards);
+    const sanitizedUrls = uniqueUrls.filter((e)=> e.includes('http')).map(utils.escapeSQLWildcards);
+    
     const insertStatement = dbService.createInsertStatement(
         TABLE_NAMES.SOURCE_URLS,
         [SOURCE_URLS_TABLE.URL],
         sanitizedUrls.map((e) => [e])
     );
 
-    return dbService.runQuery(insertStatement, sanitizedUrls);
+    await dbService.runQuery(insertStatement, sanitizedUrls);
+    return {status : 'ok'};
 }
 
 async function _getByUrls(urls) {
@@ -86,6 +87,9 @@ async function _findUnscrapedUrls(dbClient) {
 
 async function _updatedSuccessFulScraping(scrapingResult, dbClient) {
     const successResults = scrapingResult.filter(({ status }) => status === 'success');
+    if (!successResults.length) {
+        return;
+    }
     const updateSuccessStm = `
             UPDATE 
                 ${TABLE_NAMES.SOURCE_URLS} 
@@ -168,9 +172,13 @@ async function scrapeSourceUrl() {
 
 async function startAsyncScraping() {
     setTimeout(async () => {
-        const needFurtherScraping = await scrapeSourceUrl();
-        const nextTimeout = needFurtherScraping ? 0 : 10000;
-        setTimeout(() => startAsyncScraping(), nextTimeout);
+       try {
+            const needFurtherScraping = await scrapeSourceUrl();
+            const nextTimeout = needFurtherScraping ? 0 : 20000;
+            setTimeout(() => startAsyncScraping(), nextTimeout);
+       } catch(err) {
+           console.log(`error in the scraping process->\n ${err}`);
+       }
     });
 }
 

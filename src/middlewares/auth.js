@@ -5,20 +5,20 @@ function basicAuth(req, res, next) {
 
     const authorizationHeader = req.headers.authorization;
     if(!authorizationHeader) {
-        res.status(401).send('Authentication Token is Missing');
+        return res.status(401).send('Authentication Token is Missing');
     }
 
     const authComponents = authorizationHeader.split(' ');
     if (authComponents[0] !== 'Basic' || authComponents.length !== 2) {
-        res.status(401).send('Invalid format of the Authentication Token');
+        return res.status(401).send('Invalid format of the Authentication Token');
     }
 
     const [user, password] = Buffer.from(authComponents[1], 'base64').toString().split(':');
     if (user && password && user === authUser && password === authPass) {
-        next();
+        return next();
     }
 
-    res.status(401).send('Authentication Token is not valid');
+    return res.status(401).send('Authentication Token is not valid');
 }
 
 module.exports = {

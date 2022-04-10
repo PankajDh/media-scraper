@@ -30,7 +30,14 @@ function convertToCamelCaseObject(data) {
     return newData;
 }
 
+function errorBuilder(message, errorCode) {
+    const err = new Error(message);
+    err.statusCode = errorCode;
+    return err;
+}
+
 module.exports = {
     escapeSQLWildcards,
-    convertToCamelCaseObject
+    convertToCamelCaseObject,
+    errorBuilder
 };

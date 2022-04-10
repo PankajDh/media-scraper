@@ -21,7 +21,10 @@ async function _scraper(browser, scrapingUrl) {
 }
 
 async function scrape(sourceUrlObjects) {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        // executablePath: '/usr/bin/chromium-browser',
+        // args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
 
     const result = await Promise.map(
         sourceUrlObjects,
