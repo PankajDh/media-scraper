@@ -1,6 +1,5 @@
 const sourceUrlService = require('../main/sourceUrlService');
 const scrapedUrlService = require('../main/scrapedUrlService');
-const tryCatchWrapper = require('./tryCatchWrapper');
 
 function addRoutes(app) {
     app.get('/health', (req, res) => {

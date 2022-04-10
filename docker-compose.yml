@@ -11,3 +11,17 @@ services:
             POSTGRES_DATABASE: test
         volumes:
             - ./docker_content/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    app:
+        container_name: media-scraper
+        build: .
+        depends_on: 
+            - postgres
+        ports: 
+            - 2222:2222
+        environment:
+            PGUSER: test
+            PGPASSWORD: test
+            PGDATABASE: test
+            PGPORT: 5432
+            PGHOST: postgres
+            

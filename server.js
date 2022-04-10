@@ -16,7 +16,7 @@ applyMiddlewares(app);
 addRoutes(app);
 lateMiddlewares(app);
 
-// sourceUrlService.startAsyncScraping();
+sourceUrlService.startAsyncScraping();
 
 app.listen(port, () => {
     console.log('server running');
