@@ -142,6 +142,10 @@ async function _updatedFailedScraping(scrapingResult, dbClient) {
     );
 }
 
+/**
+ * @summary find urls to be scraped and scrape them
+ * @returns void
+ */
 async function scrapeSourceUrl() {
     let dbClient;
     try {
@@ -155,7 +159,6 @@ async function scrapeSourceUrl() {
         }
 
         const scrapingResult = await scrapingService.scrape(unScrapedUrls);
-
         await _updatedSuccessFulScraping(scrapingResult, dbClient);
         await _updatedFailedScraping(scrapingResult, dbClient);
 
@@ -170,11 +173,14 @@ async function scrapeSourceUrl() {
     }
 }
 
+/**
+ * @summary schedule next scraping event
+ */
 async function startAsyncScraping() {
     setTimeout(async () => {
        try {
             const needFurtherScraping = await scrapeSourceUrl();
-            const nextTimeout = needFurtherScraping ? 0 : 20000;
+            const nextTimeout = needFurtherScraping ? 1000 : 20000;
             setTimeout(() => startAsyncScraping(), nextTimeout);
        } catch(err) {
            console.log(`error in the scraping process->\n ${err}`);
@@ -185,6 +191,5 @@ async function startAsyncScraping() {
 module.exports = {
     add,
     get,
-    scrapeSourceUrl,
     startAsyncScraping,
 };

@@ -5,7 +5,6 @@ const { errorMiddleware } = require('./error');
 
 
 function applyMiddlewares(app) {
-   // add basic auth middleware
     app.use(cors());
     app.use(basicAuth);
     app.use(logger);

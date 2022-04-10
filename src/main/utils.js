@@ -1,9 +1,19 @@
 const camelCase = require('camelcase');
 
+/**
+ * @summary escapes some characters for safer sql
+ * @param {String} str 
+ * @returns {String}
+ */
 function escapeSQLWildcards(str) {
     return str.replace(/%|'|_|[|]/g, (char) => `\\${char}`);
 }
 
+/**
+ * @summary convert the keys to camelCasee
+ * @param {Object} data 
+ * @returns {Object}
+ */
 function convertToCamelCaseObject(data) {
     if (!data) {
         return data;
@@ -30,6 +40,12 @@ function convertToCamelCaseObject(data) {
     return newData;
 }
 
+/**
+ * @summary create custom error type
+ * @param {String} message 
+ * @param {Number} errorCode 
+ * @returns Error
+ */
 function errorBuilder(message, errorCode) {
     const err = new Error(message);
     err.statusCode = errorCode;

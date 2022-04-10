@@ -2,6 +2,12 @@ const utils = require('./utils');
 const dbService = require('./dbService');
 const { TABLE_NAMES, SCRAPED_URLS_TABLE, SOURCE_URLS_TABLE } = require('./dbTables');
 
+
+/**
+ * @summary find paginated data for the scraped urls
+ * @param {Object} params 
+ * @returns arrray of scraped url objects
+ */
 async function get(params) {
     // extract the pagination params
     const { resultsPerPage = 20, pageNumber = 1 } = params;
@@ -22,12 +28,13 @@ async function get(params) {
                 queryParams.length + 1
             }`
         );
-        queryParams.push(utils.escapeSQLWildcards(type));
+        queryParams.push(utils.escapeSQLWildcards(type.trim()));
     }
 
-    if (searchString) {
+    const sanitizedSearchString = searchString ? utils.escapeSQLWildcards(searchString.trim()) : '';
+    if (sanitizedSearchString) {
         filters.push(`(${TABLE_NAMES.SCRAPED_URLS}.${SCRAPED_URLS_TABLE.ALT} ilike $${queryParams.length + 1})`);
-        queryParams.push(`%${utils.escapeSQLWildcards(searchString)}%`);
+        queryParams.push(`%${sanitizedSearchString}%`);
     }
 
     const selectStatement = `
@@ -57,6 +64,12 @@ async function get(params) {
     }
 }
 
+/**
+ * @summary add the scraped url data
+ * @param {Object} msgBody 
+ * @param {PoolClient} dbClient 
+ * @returns void
+ */
 async function add(msgBody, dbClient) {
     const columns = [
         SCRAPED_URLS_TABLE.URL,
