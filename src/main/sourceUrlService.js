@@ -15,7 +15,7 @@ async function add(msgBody) {
     
     const urlsAlreadyPresent = (await _getByUrls(webUrls)).map(({ url }) => url);
     const uniqueUrls = webUrls.filter((val) => !urlsAlreadyPresent.includes(val));
-    const sanitizedUrls = uniqueUrls.filter((e)=> e.includes('http')).map(utils.escapeSQLWildcards);
+    const sanitizedUrls = uniqueUrls.map(e=>utils.escapeSQLWildcards(e.trim())).filter((e)=> e.startsWith('http'));
     
     const insertStatement = dbService.createInsertStatement(
         TABLE_NAMES.SOURCE_URLS,
@@ -125,21 +125,24 @@ async function _updatedFailedScraping(scrapingResult, dbClient) {
         return;
     }
 
-    const updateFailedStm = `
-        UPDATE 
-            ${TABLE_NAMES.SOURCE_URLS} 
-        SET 
-            ${SOURCE_URLS_TABLE.IS_SCRAPED} = false, 
-            ${SOURCE_URLS_TABLE.RETRIES}=${SOURCE_URLS_TABLE.RETRIES} + 1 
-        WHERE 
-            ${SOURCE_URLS_TABLE.ID} in (${failedResults.map((_, idx) => `$${idx + 1}`)})
-    `;
+    await Promise.mapSeries(failedResults, async({id, error})=>{
+        const updateFailedStm = `
+            UPDATE 
+                ${TABLE_NAMES.SOURCE_URLS} 
+            SET 
+                ${SOURCE_URLS_TABLE.IS_SCRAPED} = false, 
+                ${SOURCE_URLS_TABLE.RETRIES}=${SOURCE_URLS_TABLE.RETRIES} + 1,
+                ${SOURCE_URLS_TABLE.ERROR}=$1
+            WHERE 
+                ${SOURCE_URLS_TABLE.ID}=$2
+        `;
 
-    await dbService.runQuery(
-        updateFailedStm,
-        failedResults.map(({ id }) => id),
-        dbClient
-    );
+        await dbService.runQuery(
+            updateFailedStm,
+            [JSON.stringify(error), id],
+            dbClient
+        );
+    });
 }
 
 /**
@@ -178,15 +181,14 @@ async function scrapeSourceUrl() {
  * @summary schedule next scraping event
  */
 async function startAsyncScraping() {
-    setTimeout(async () => {
        try {
             const needFurtherScraping = await scrapeSourceUrl();
             const nextTimeout = needFurtherScraping ? 1000 : 20000;
             setTimeout(() => startAsyncScraping(), nextTimeout);
        } catch(err) {
            console.log(`error in the scraping process->\n ${err}`);
+           setTimeout(()=> startAsyncScraping(), 5000);
        }
-    });
 }
 
 module.exports = {
